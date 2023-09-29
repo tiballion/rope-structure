@@ -6,8 +6,8 @@ struct Rope
 {
     char *string;
     int length;
-    Rope *left;
-    Rope *right;
+    struct Rope *left;
+    struct Rope *right;
 }Rope;
 
 Rope *rope_new(char *string);
