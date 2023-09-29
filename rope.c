@@ -19,9 +19,8 @@ Rope *rope_new(char *string) {
     }
     else {
         Rope *rope = malloc(sizeof(Rope));
-        rope->string = malloc(sizeof(char) * (MAX_LENGTH_ROPE + 1));
-        strncpy(rope->string, string, MAX_LENGTH_ROPE);
-        rope->string[MAX_LENGTH_ROPE] = '\0';
+        rope->string[1] = '\0';
+        strcpy(rope->string, "");
         rope->length = MAX_LENGTH_ROPE;
         rope->left = rope_new(string);
         rope->right = rope_new(string + MAX_LENGTH_ROPE);
