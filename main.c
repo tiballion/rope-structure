@@ -4,9 +4,18 @@
 #include "rope.h"
 
 int main() {
-    char example_string[] = "Hello, Rope!";
-    Rope *my_rope = rope_new(example_string);
+    // Crée un arbre Rope pour la première chaîne
+    Rope *root1 = NULL;
+    char a[] = "111122223333";
+    int n1 = sizeof(a) / sizeof(a[0]) - 1; // Exclut le caractère nul
+    createRopeStructure(&root1, NULL, a, 0, n1 - 1);
 
-    free(my_rope);
+    // Génère le fichier DOT
+    FILE *dotFile = fopen("rope_graph.dot", "w");
+    fprintf(dotFile, "digraph Rope {\n");
+    generateDotCode(root1, dotFile);
+    fprintf(dotFile, "}\n");
+    fclose(dotFile);
+
     return 0;
 }

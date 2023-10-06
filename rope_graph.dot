@@ -1,0 +1,15 @@
+digraph Rope {
+node0x13ee06b40 [label="Count=6"];
+node0x13ee06b40 -> node0x13ee06aa0 [label="left"];
+node0x13ee06aa0 [label="Count=3"];
+node0x13ee06aa0 -> node0x13ee06ad0 [label="left"];
+node0x13ee06ad0 [label="111"];
+node0x13ee06aa0 -> node0x13ee068c0 [label="right"];
+node0x13ee068c0 [label="122"];
+node0x13ee06b40 -> node0x13ee06900 [label="right"];
+node0x13ee06900 [label="Count=6"];
+node0x13ee06900 -> node0x13ee06930 [label="left"];
+node0x13ee06930 [label="223"];
+node0x13ee06900 -> node0x13ee06970 [label="right"];
+node0x13ee06970 [label="333"];
+}
