@@ -57,6 +57,8 @@ int rope_len(Rope *root) {
         // Sinon, c'est un nœud interne, retourne la somme des longueurs des sous-arbres
         return rope_len(root->left) + rope_len(root->right);
     }
+
+    freeRope(root);
 }
 
 // Fonction qui imprime la chaîne (feuilles)
@@ -133,6 +135,8 @@ char getCharAtIndex(Rope *root, int index) {
             return getCharAtIndex(root->right, index - root->lCount);
         }
     }
+
+    freeRope(root);
 }
 
 void insertAtIndex(Rope **root, int index, const char *insertStr) {
@@ -220,6 +224,7 @@ void splitRope(Rope *root, int index, Rope **left, Rope **right) {
             (*left)->lCount -= rope_len(*right);  // Ajustement du lCount
         }
     }
+    
 }
 
 Rope *concatenateRopes(Rope *left, Rope *right) {
@@ -236,6 +241,9 @@ Rope *concatenateRopes(Rope *left, Rope *right) {
     concatenated->str = NULL; // La corde concaténée est un nœud interne sans chaîne associée
 
     return concatenated;
+
+    freeRope(left);
+    freeRope(right);
 }
 
 void deleteAtIndex(Rope **root, int index, int length) {
