@@ -65,8 +65,8 @@ int main()
     srand(time(NULL));
 
     const size_t nb_chars = 10000;
-    const size_t nb_insertions = 10;
-    const size_t nb_repetitions = 50;
+    const size_t nb_insertions = 100;
+    const size_t nb_repetitions = 10;
 
     char *base = (char *)malloc(sizeof(char) * (1 + nb_chars));
     for (int i = 0; i < nb_chars; ++i)
