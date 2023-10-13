@@ -3,20 +3,28 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-
 #include "rope.h"
+
 // gcc bench.c -O3  -Wall -Wextra &&  ./a.out | tee bench.csv
 
 void bench_rope(Rope *rope, char *base, size_t nb_insertions)
 {
+    size_t base_len = strlen(base);
 
     for (int i = 0; i < nb_insertions; ++i)
     {
         size_t len = rope_len(rope);
-        size_t pos = rand() % len;
+        size_t pos = rand() % (len + 1);
 
-        rope_insert_at(rope, pos, base);
+        insertAtIndex(&rope, pos, base);
     }
+}
+
+void rope_delete(Rope *rope)
+{
+    deleteAtIndex(&rope, rand() % rope_len(rope), 1);
+
+    freeRope(rope);
 }
 
 void bench_string(char **s, char *base, size_t nb_insertions)
@@ -57,7 +65,7 @@ int main()
     srand(time(NULL));
 
     const size_t nb_chars = 10000;
-    const size_t nb_insertions = 1000;
+    const size_t nb_insertions = 10;
     const size_t nb_repetitions = 50;
 
     char *base = (char *)malloc(sizeof(char) * (1 + nb_chars));
@@ -71,7 +79,8 @@ int main()
     for (int r = 0; r < nb_repetitions; ++r)
     {
         clock_t start_create = clock();
-        Rope *rope = rope_new(base);
+        Rope *rope = NULL;
+        createRopeStructure(&rope, NULL, base, 0, strlen(base) - 1);
         assert(rope != NULL);
         clock_t start_insert = clock();
         bench_rope(rope, base, nb_insertions);
@@ -84,6 +93,7 @@ int main()
         float delete_time = (float)(stop_delete - start_delete) / CLOCKS_PER_SEC;
 
         printf("ROPE;%f;%f;%f\n", create_time, insert_time, delete_time);
+        // printf("ROPE;%f;0;0\n", create_time);
     }
 
     for (int r = 0; r < nb_repetitions; ++r)
@@ -104,6 +114,7 @@ int main()
         float delete_time = (float)(stop_delete - start_delete) / CLOCKS_PER_SEC;
 
         printf("STR;%f;%f;%f\n", create_time, insert_time, delete_time);
+        // printf("STR;%f;0;0\n", create_time);
     }
 
     free(base);

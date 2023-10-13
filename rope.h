@@ -12,12 +12,16 @@ struct Rope
 }Rope;
 
 void createRopeStructure(Rope **node, Rope *par, char a[], int l, int r);
-void concatenate(Rope **root3, Rope *root1, Rope *root2, int n1);
+void freeRope(Rope *root);
+int rope_len(Rope *root);
 void printString(Rope *r);
 void printRopeRepresentation(Rope *root, int depth);
 void generateDotCode(Rope *root, FILE *dotFile);
-int rope_len(Rope *rope);
-void rope_insert_at(Rope *rope, int index, char *string);
-void rope_delete(Rope *rope);
+
+char getCharAtIndex(Rope *root, int index);
+void insertAtIndex(Rope **root, int index, const char *insertStr);
+void splitRope(Rope *root, int index, Rope **left, Rope **right);
+Rope *concatenateRopes(Rope *left, Rope *right);
+void deleteAtIndex(Rope **root, int index, int length);
 
 #endif // ROPE_H

@@ -10,39 +10,53 @@ void createRopeStructure(Rope **node, Rope *par, char a[], int l, int r) {
     Rope *tmp = (Rope*)malloc(sizeof(Rope));
     tmp->left = tmp->right = NULL;
 
-    // Nous mettons la moitié des nœuds dans le sous-arbre gauche
-    tmp->parent = par;
+    // Calcul de la longueur de la chaîne actuelle
+    int currentLength = r - l + 1;
 
-    // Si la longueur de la chaîne est plus grande
-    if ((r - l) > MAX_LENGTH_ROPE) {
+    // Si la longueur de la chaîne est plus grande que MAX_LENGTH_ROPE
+    if (currentLength > MAX_LENGTH_ROPE) {
         tmp->str = NULL;
-        tmp->lCount = (r - l) / 2;
+        tmp->lCount = currentLength / 2;
         *node = tmp;
         int m = (l + r) / 2;
-        createRopeStructure(&((*node)->left), *node, a, l, m);
-        createRopeStructure(&((*node)->right), *node, a, m + 1, r);
+
+        // Ajuste la longueur de gauche si la longueur totale est impaire
+        if ((currentLength % 2 == 1) && (tmp->lCount + l == r - tmp->lCount)) {
+            tmp->lCount++;
+        }
+
+        createRopeStructure(&((*node)->left), *node, a, l, l + tmp->lCount - 1);
+        createRopeStructure(&((*node)->right), *node, a, l + tmp->lCount, r);
     } else {
         *node = tmp;
-        tmp->lCount = (r - l);
-        int j = 0;
-        tmp->str = (char*)malloc(MAX_LENGTH_ROPE * sizeof(char));
+        tmp->lCount = currentLength;
+        tmp->str = (char*)malloc(currentLength * sizeof(char));
         for (int i = l; i <= r; i++)
-            tmp->str[j++] = a[i];
+            tmp->str[i - l] = a[i];
     }
 }
 
-void concatenate(Rope **root3, Rope *root1, Rope *root2, int n1) {
-    // Crée un nouveau nœud Rope et fait de root1 et root2 ses enfants.
-    Rope *tmp = (Rope*)malloc(sizeof(Rope));
-    tmp->parent = NULL;
-    tmp->left = root1;
-    tmp->right = root2;
-    root1->parent = root2->parent = tmp;
-    tmp->lCount = n1;
+void freeRope(Rope *root) {
+    if (root != NULL) {
+        freeRope(root->left);
+        freeRope(root->right);
+        free(root->str);
+        free(root);
+    }
+}
 
-    // Rend la chaîne de tmp vide et met à jour la référence root3
-    tmp->str = NULL;
-    *root3 = tmp;
+int rope_len(Rope *root) {
+    if (root == NULL) {
+        return 0;
+    }
+
+    if (root->str != NULL) {
+        // Si le nœud est une feuille, retourne la longueur de la chaîne
+        return strlen(root->str);
+    } else {
+        // Sinon, c'est un nœud interne, retourne la somme des longueurs des sous-arbres
+        return rope_len(root->left) + rope_len(root->right);
+    }
 }
 
 // Fonction qui imprime la chaîne (feuilles)
@@ -76,19 +90,6 @@ void printRopeRepresentation(Rope *root, int depth) {
     }
 }
 
-int rope_len(Rope *rope) {
-    // Return the length of the rope
-    return 0;
-}
-
-void rope_insert_at(Rope *rope, int index, char *string) {
-    // Insert the string at the given index
-}
-
-void rope_delete(Rope *rope) {
-    // Delete the rope
-}
-
 // Fonction pour générer le code DOT de la représentation de la Rope
 void generateDotCode(Rope *root, FILE *dotFile) {
     if (root != NULL) {
@@ -113,60 +114,159 @@ void generateDotCode(Rope *root, FILE *dotFile) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-#define MAX_LENGTH_ROPE 4
-
-Rope *rope_new(char *string) {
-    printf("rope_new\n");
-    int len = strlen(string);
-    if(len <= MAX_LENGTH_ROPE) {
-        Rope *rope = malloc(sizeof(Rope));
-        rope->string = malloc(sizeof(char) * (len + 1));
-        strcpy(rope->string, "");
-        rope->length = len;
-        rope->left = NULL;
-        rope->right = NULL;
-        return rope;
+char getCharAtIndex(Rope *root, int index) {
+    if (root == NULL || index < 0 || index >= rope_len(root)) {
+        // Gérer les cas d'erreur, par exemple, retourner un caractère spécial ou signaler une erreur.
+        return '\0';
     }
-    else {
-        printf("sa crash la oeoe\n");
-        Rope *rope = malloc(sizeof(Rope));
-        //rope->string[1] = '\0'; // SA MARCHE PAS
-        strcpy(rope->string, "");
-        rope->length = MAX_LENGTH_ROPE;
-        rope->left = rope_new(string);
-        rope->right = rope_new(string + MAX_LENGTH_ROPE);
-        return rope;
+
+    if (root->str != NULL) {
+        // Si le nœud est une feuille, renvoyer le caractère à l'index spécifié.
+        return root->str[index];
+    } else {
+        // Sinon, déterminer dans quel sous-arbre se trouve l'index.
+        if (index < root->lCount) {
+            // L'index est dans le sous-arbre gauche.
+            return getCharAtIndex(root->left, index);
+        } else {
+            // L'index est dans le sous-arbre droit.
+            return getCharAtIndex(root->right, index - root->lCount);
+        }
     }
-    return NULL;
 }
 
-int rope_len(Rope *rope) {
-    // Return the length of the rope
-    return 0;
+void insertAtIndex(Rope **root, int index, const char *insertStr) {
+    if (index < 0 || index > rope_len(*root)) {
+        // Gérer les cas d'erreur, par exemple, signaler une erreur.
+        printf("Index out of bounds.\n");
+        return;
+    }
+
+    // Crée une nouvelle corde pour la chaîne à insérer
+    Rope *insertedNode = NULL;
+    createRopeStructure(&insertedNode, NULL, insertStr, 0, strlen(insertStr) - 1);
+
+    // Si la corde est vide, remplace la corde vide par la nouvelle corde à insérer
+    if (*root == NULL) {
+        *root = insertedNode;
+        return;
+    }
+
+    // Cas spécial : insertion au début de la corde
+    if (index == 0) {
+        // Crée une nouvelle corde pour la corde existante
+        Rope *existingNode = NULL;
+        createRopeStructure(&existingNode, NULL, "", 0, 0);
+
+        // Met la corde existante à droite de la nouvelle corde insérée
+        insertedNode->right = existingNode;
+
+        // Met la nouvelle corde insérée comme racine
+        *root = insertedNode;
+        return;
+    }
+
+    // Cas général : divise la corde existante à l'index spécifié
+    Rope *leftSubtree = NULL;
+    Rope *rightSubtree = NULL;
+    splitRope(*root, index, &leftSubtree, &rightSubtree);
+
+    // Le nœud interne créé lors de l'insertion doit avoir le lCount ajusté
+    insertedNode->lCount = rope_len(leftSubtree);
+
+    // Concatène la corde gauche avec la nouvelle corde insérée
+    Rope *newRoot = concatenateRopes(leftSubtree, insertedNode);
+
+    // Concatène la nouvelle corde insérée avec la corde droite
+    *root = concatenateRopes(newRoot, rightSubtree);
 }
 
-void rope_insert_at(Rope *rope, int index, char *string) {
-    // Insert the string at the given index
+void splitRope(Rope *root, int index, Rope **left, Rope **right) {
+    if (root == NULL) {
+        *left = *right = NULL;
+        return;
+    }
+
+    if (index == 0) {
+        // L'index est à la première position, donc la corde de gauche est vide
+        *left = NULL;
+        *right = root;
+    } else if (index >= rope_len(root)) {
+        // L'index est à la dernière position ou au-delà, donc la corde de droite est vide
+        *left = root;
+        *right = NULL;
+    } else if (root->str != NULL) {
+        // La corde est une feuille, divise la chaîne à l'index spécifié
+        *left = (Rope *)malloc(sizeof(Rope));
+        (*left)->left = (*left)->right = NULL;
+        (*left)->str = strndup(root->str, index);
+        (*left)->lCount = strlen((*left)->str);
+
+        *right = (Rope *)malloc(sizeof(Rope));
+        (*right)->left = (*right)->right = NULL;
+        (*right)->str = strndup(root->str + index, strlen(root->str) - index);
+        (*right)->lCount = strlen((*right)->str);
+    } else {
+        // La corde est un nœud interne, détermine dans quel sous-arbre se trouve l'index
+        if (index <= root->lCount) {
+            // L'index est dans le sous-arbre gauche
+            *right = root;
+            splitRope(root->left, index, left, &((*right)->left));
+            (*right)->lCount -= rope_len(*left);  // Ajustement du lCount
+        } else {
+            // L'index est dans le sous-arbre droit
+            *left = root;
+            splitRope(root->right, index - root->lCount, &((*left)->right), right);
+            (*left)->lCount -= rope_len(*right);  // Ajustement du lCount
+        }
+    }
 }
 
-void rope_delete(Rope *rope) {
-    // Delete the rope
-}*/
+Rope *concatenateRopes(Rope *left, Rope *right) {
+    Rope *concatenated = (Rope *)malloc(sizeof(Rope));
+    concatenated->left = left;
+    concatenated->right = right;
+
+    if (left != NULL) {
+        concatenated->lCount = rope_len(left);
+    }else{
+        concatenated->lCount = 0;
+    }
+
+    concatenated->str = NULL; // La corde concaténée est un nœud interne sans chaîne associée
+
+    return concatenated;
+}
+
+void deleteAtIndex(Rope **root, int index, int length) {
+    if (*root == NULL || index < 0 || length <= 0 || index + length > rope_len(*root)) {
+        // Gérer les cas d'erreur, par exemple, signaler une erreur.
+        printf("Invalid index or length for deletion.\n");
+        return;
+    }
+
+    // Cas spécial : suppression de caractères au début
+    if (index == 0) {
+        Rope *newRoot = NULL;
+        splitRope(*root, length, &newRoot, root);
+        freeRope(newRoot);
+        return;
+    }
+
+    // Cas général : diviser la corde à l'index spécifié
+    Rope *leftSubtree = NULL;
+    Rope *rightSubtree = NULL;
+    splitRope(*root, index, &leftSubtree, &rightSubtree);
+
+    // Diviser la corde de droite pour obtenir la plage de caractères à supprimer
+    Rope *deletedChars = NULL;
+    splitRope(rightSubtree, length, &deletedChars, &rightSubtree);
+
+    // Concaténer les deux parties restantes
+    Rope *newRoot = concatenateRopes(leftSubtree, rightSubtree);
+
+    // Libérer la mémoire des caractères supprimés
+    freeRope(deletedChars);
+
+    *root = newRoot;
+}
