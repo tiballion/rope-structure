@@ -1,0 +1,21 @@
+digraph Rope {
+node0x560df4d509d0 [label="Count=6"];
+node0x560df4d509d0 -> node0x560df4d509a0 [label="left"];
+node0x560df4d509a0 [label="Count=0"];
+node0x560df4d509a0 -> node0x560df4d50970 [label="left"];
+node0x560df4d50970 [label="Count=4"];
+node0x560df4d50970 -> node0x560df4d502d0 [label="left"];
+node0x560df4d502d0 [label="Count=2"];
+node0x560df4d502d0 -> node0x560df4d50300 [label="left"];
+node0x560df4d50300 [label="ABC"];
+node0x560df4d502d0 -> node0x560df4d508d0 [label="right"];
+node0x560df4d508d0 [label="D"];
+node0x560df4d50970 -> node0x560df4d50880 [label="right"];
+node0x560df4d50880 [label="O"];
+node0x560df4d509a0 -> node0x560df4d50920 [label="right"];
+node0x560df4d50920 [label="E"];
+node0x560df4d509d0 -> node0x560df4d503a0 [label="right"];
+node0x560df4d503a0 [label="Count=0"];
+node0x560df4d503a0 -> node0x560df4d50420 [label="right"];
+node0x560df4d50420 [label="IJ"];
+}
