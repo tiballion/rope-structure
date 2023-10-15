@@ -64,7 +64,7 @@ int main()
 {
     srand(time(NULL));
 
-    const size_t nb_chars = 10000;
+    const size_t nb_chars = 100000;
     const size_t nb_insertions = 100;
     const size_t nb_repetitions = 10;
 
